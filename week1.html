@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>迷雾森林：秘密档案领取</title>
+    <style>
+        :root {
+            --bg-color: #1a1a1a;
+            --paper-color: #d4c4a8;
+            --accent-color: #8b0000; /* 猩红印章色 */
+            --text-color: #2c2c2c;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            background-color: var(--bg-color);
+            font-family: "Courier New", Courier, monospace;
+            height: 100%; color: var(--paper-color);
+            overflow: hidden;
+        }
+
+        /* 噪点背景滤镜 */
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: url('https://www.transparenttextures.com/patterns/stardust.png');
+            pointer-events: none; opacity: 0.3; z-index: 10;
+        }
+
+        .container {
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            height: 100vh; padding: 20px; box-sizing: border-box;
+        }
+
+        /* 档案纸张 */
+        .file-folder {
+            width: 90%; max-width: 400px;
+            background-color: var(--paper-color);
+            color: var(--text-color);
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+            transform: rotate(-1deg);
+            transition: all 0.5s ease;
+        }
+
+        h1 { font-size: 1.2rem; border-bottom: 2px solid #2c2c2c; padding-bottom: 10px; margin-top: 0; }
+
+        .input-group { margin: 20px 0; width: 100%; }
+
+        input {
+            width: 100%; padding: 10px; border: 1px solid #2c2c2c;
+            background: transparent; font-size: 1rem; box-sizing: border-box;
+            outline: none;
+        }
+
+        button {
+            width: 100%; padding: 12px; background: #2c2c2c; color: white;
+            border: none; cursor: pointer; font-weight: bold; letter-spacing: 2px;
+        }
+
+        /* 结果显示区 */
+        #result {
+            display: none; margin-top: 20px; border: 1px dashed #2c2c2c;
+            padding: 15px; position: relative;
+        }
+
+        .stamp {
+            position: absolute; right: -10px; bottom: -10px;
+            width: 80px; height: 80px; border: 3px solid var(--accent-color);
+            border-radius: 50%; color: var(--accent-color);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; transform: rotate(15deg);
+            opacity: 0; transition: opacity 0.5s;
+        }
+
+        .keyword { font-size: 1.5rem; font-weight: bold; color: var(--accent-color); margin: 10px 0; }
+        .instruction { font-size: 0.9rem; line-height: 1.4; color: #555; font-style: italic; }
+
+        .footer-note { font-size: 0.7rem; margin-top: 20px; color: #888; text-align: center; }
+    </style>
+</head>
+<body>
+    <div class="overlay"></div>
+    
+    <div class="container">
+        <div class="file-folder" id="folder">
+            <h1>档案编号：TOON-1999</h1>
+            <p style="font-size: 0.8rem;">请输入您的身份识别码（手机尾号）以提取今日秘密令：</p>
+            
+            <div class="input-group">
+                <input type="number" id="suffix" placeholder="输入尾号后两位" maxlength="2">
+            </div>
+            
+            <button onclick="revealSecret()">解 密 档 案</button>
+
+            <div id="result">
+                <div id="stamp" class="stamp">已核准</div>
+                <div>您的核心关键词：</div>
+                <div class="keyword" id="keywordDisplay">- 提取中 -</div>
+                <div class="instruction" id="descDisplay">正在连接加密波段...</div>
+            </div>
+
+            <div class="footer-note">※ 警告：此档案在阅后请勿在公开频道讨论其具体关键词。</div>
+        </div>
+    </div>
+
+    <script>
+        const secrets = {
+            '0': { word: '慈悲', desc: '在你的角色眼神中加入一种病态的宽容。'},
+            '1': { word: '贪婪', desc: '角色手中应握有不属于它的物件。'},
+            '2': { word: '伪证', desc: '角色佩戴的某个饰品与其实际职业完全相悖。'},
+            '3': { word: '审判', desc: '光影需从正上方投射，产生深邃的眼窝阴影。'},
+            '4': { word: '流言', desc: '背景中应出现模糊的、正在窥视的眼睛。'},
+            '5': { word: '怀旧', desc: '角色的色调偏黄，画出一种旧报纸翻折的质感。'},
+            '6': { word: '狂热', desc: '角色的嘴角弧度应超越正常的肌肉解剖范围。'},
+            '7': { word: '缄默', desc: '画面中绝对不能出现角色的嘴部，用配饰遮挡。'},
+            '8': { word: '背叛', desc: '影子与角色的动作应有微小但可察觉的不一致。'},
+            '9': { word: '纯真', desc: '使用极高饱和度的色彩，却画出最冰冷的表情。'}
+        };
+
+        function revealSecret() {
+            const input = document.getElementById('suffix').value;
+            if (!input) { alert('请输入识别码！'); return; }
+
+            const lastDigit = input.slice(-1);
+            const data = secrets[lastDigit];
+
+            // 动效切换
+            document.querySelector('button').style.display = 'none';
+            document.getElementById('result').style.display = 'block';
+            
+            setTimeout(() => {
+                document.getElementById('keywordDisplay').innerText = `【${data.word}】`;
+                document.getElementById('descDisplay').innerText = `“指令：${data.desc}”`;
+                document.getElementById('stamp').style.opacity = '0.7';
+                document.getElementById('folder').style.transform = 'rotate(0deg) scale(1.05)';
+            }, 800);
+        }
+    </script>
+</body>
+</html>
